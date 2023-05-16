@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <h1>Dashboard</h1>
+    <table id="userData">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Email</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <button onclick="logout()">Logout</button>
+
+    <script>
+        // Function to check if user is logged in
+        function checkLoginData() {
+            // Check if token exists in local storage
+            return localStorage.getItem("token") !== null;
+        }
+
+        // Function to set login data
+        function setLoginData(token) {
+            // Set token in local storage
+            localStorage.setItem("token", token);
+        }
+
+        // Function to clear login data
+        function clearLoginData() {
+            // Remove token from local storage
+            localStorage.removeItem("token");
+        }
+
+        // Check if user is logged in
+        if (checkLoginData()) {
+            // Make API call to get user data
+            fetch("https://reqres.in/api/users", {
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + localStorage.getItem("token") // Include the token in the request header
+                }
+            })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (data) {
+                    if (data.data) {
+                        var userData = data.data;
+                        var tbody = document.querySelector("#userData tbody");
+                        tbody.innerHTML = ""; // Clear table body
+
+                        // Populate table with user data
+                        userData.forEach(function (user) {
+                            var row = document.createElement("tr");
+                            row.innerHTML = "<td>" + user.id + "</td>" +
+                                "<td>" + user.email + "</td>" +
+                                "<td>" + user.first_name + "</td>" +
+                                "<td>" + user.last_name + "</td>";
+                            tbody.appendChild(row);
+                        });
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        } else {
+            // Redirect to login page if not logged in
+            window.location.href = "login.html";
+        }
+
+        // Logout function
+        function logout() {
+            clearLoginData(); // Clear login data
+            window.location.href = "login.html"; // Redirect to login page
+        }
+    </script>
+</body>
+
+</html>
